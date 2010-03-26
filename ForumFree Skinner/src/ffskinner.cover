@@ -1,0 +1,625 @@
+    1: '''Allows you to create and edit skin for ForumFree.net and ForumCommunity.net without knowing css'''
+       
+    1: from __future__ import with_statement
+    1: import sys
+    1: from PyQt4 import QtCore, QtGui, QtWebKit
+    1: from FFSconfig import config
+    1: import webbrowser
+       
+    2: class PushButton(QtGui.QPushButton):
+    1:     def __init__(self, text, selector, parent):
+    9:         QtGui.QPushButton.__init__(self, text, parent)
+    9:         self.selector = selector
+    9:         self.connect(self, QtCore.SIGNAL('clicked()'), self.clickedText)
+               
+    1:     def clickedText(self):
+               self.emit(QtCore.SIGNAL('clickedText(PyQt_PyObject)'), self.selector)
+       
+    2: class Selector(QtCore.QObject):
+    1:     def __init__(self, css, selector):
+               QtCore.QObject.__init__(self)
+               self.css = css
+               self.selector = selector
+           
+    1:     def __checkProperty(self, property):
+                   if property in self.css[self.selector]: 
+                       return True
+                   else: 
+                       return False
+                   
+    1:     def background(self):
+               propertyDict = {}
+               if self.__checkProperty(property = 'background:'):
+                   for value in self.css[self.selector]['background:']:
+                       if value[:4] == 'http':
+                           propertyDict['image'] = value
+                       elif value in ['repeat', 'repeat-x', 'repeat-y', 'no-repeat']:
+                           propertyDict['repeat'] = value
+                       elif value in ['scroll', 'fixed']:
+                           propertyDict['attachment'] = value
+                       elif QtGui.QColor(value).isValid():
+                           propertyDict['color'] = value
+               else:
+                   for property in ['color', 'image', 'repeat', 'attachment']:
+                       try:
+                           propertyDict[property] = self.css[self.selector]['background-%s:' % property][0]
+                       except KeyError:
+                           continue
+       
+               return propertyDict
+           
+    1:     def font(self):
+               propertyDict = {}
+               if self.__checkProperty(property = 'font:'):
+                   raise NotImplementedError
+               else:
+                   try:
+                       propertyDict['family'] = ''.join( self.css[self.selector]['font-family:'] )
+                   except:
+                       pass
+                   try:
+                       propertyDict['color'] = self.css[self.selector]['color:'][0]
+                   except:
+                       pass
+                   for property in ['size', 'style', 'weight']:
+                       try:
+                           propertyDict[property] = self.css[self.selector]['font-%s:' % property][0]
+                       except KeyError:
+                           continue
+                       
+               return propertyDict
+           
+    1:     def setBackground(self, property, value):
+               if self.__checkProperty(property = 'background:'):
+                   values = self.background()
+                   values[property] = value
+                   self.edit('background:', *values.values() )
+               else:
+                   self.edit('background-%s:' % property, value)
+                   
+    1:     def setFont(self, property, value):
+               if self.__checkProperty(property = 'font:'):
+                   raise NotImplementedError
+               else:
+                   if property == 'color':
+                       self.edit('color:', value)
+                   else:
+                       self.edit('font-%s:' % property, value)
+       
+    1:     def edit(self, property, *values):
+               self.css[self.selector][property] = values
+               self.emit(QtCore.SIGNAL('cssChanged()'))
+       
+    2: class SkinParser(QtCore.QObject):
+    1:     def __init__(self):
+    1:         QtCore.QObject.__init__(self)
+    1:         self.css = {}
+               
+    1:     def __parseCSS(self, css):
+    1:         def addProperty(property):
+                   #Drop unnecessary char         
+ 6008:             for char in [';', '{', '}', 'url(', ')', '\'', '"']:
+ 5257:                 property = property.replace(char, '')
+  751:             if len(property) == 0:
+    1:                 return
+                   
+  750:             if self.currentSelector not in self.css:
+  109:                 self.css[self.currentSelector] = {}
+       
+  750:             if property[-1] == ':':
+  301:                 self.css[self.currentSelector][property] = []
+  301:                 self.lastProperty = property
+                   else:
+  449:                 try:
+  449:                     self.css[self.currentSelector][self.lastProperty].append(property)
+                       except:
+                           print 'error in parser'
+                               
+    1:         self.css = {}              
+  279:         for line in css:
+  278:             self.currentSelector = ''
+  278:             self.lastProperty = None
+  278:             startProperty = False
+  278:             line = line.split()
+ 1257:             for item in line:
+  996:                 if not startProperty:
+  354:                     if item[0] == '/':
+   17:                         break    
+  337:                     elif item == '{':
+    1:                         startProperty = True  
+  336:                     elif item[0] == '{':
+  109:                         startProperty = True
+  109:                         addProperty(item)
+                           else:
+  227:                         if len(self.currentSelector) == 0:
+  110:                             self.currentSelector = item
+                               else:
+  117:                             self.currentSelector +=  ' ' + item
+                       else:
+  642:                         addProperty(item)
+                   
+    1:     def loadFromFile(self, skin = 'example'):               
+    1:         self.skin = skin                    
+    1:         with open('skin/' + self.skin + '.css') as css:
+    1:             self.__parseCSS(css)
+           
+    1:     def loadFromText(self, css, skin = 'None'):
+               self.skin = skin
+               css = css.split('\n')
+               self.__parseCSS(css)
+           
+    1:     def getSelector(self, selector):
+               selector = Selector(css = self.css, selector = selector)
+               self.connect(selector, QtCore.SIGNAL('cssChanged()'), self.cssChanged)
+               return selector
+               
+    1:     def cssChanged(self):
+               self.emit(QtCore.SIGNAL('cssChanged()'))
+                        
+    1:     def getCSS(self):
+    2:         orderlist = ['body', 'table, div', 'a:link, a:visited, a:active', 'a:hover', '.nav', 
+    2:                      '.skin_tbl_width, .skin_tbl, .header_width, .stats .border', '.skin_tbl_border',
+    2:                      '.utente', '.amministratore', '.moderatore', '.daconvalidare', '.header_width',
+    2:                      '.header', '.menu', '.menu a:link, .menu a:visited, .menu a:active', '.menu a:hover',
+    2:                      '.mtitle', '.mback_left, .mback_right', '.mleft_bottom, .mright_bottom',
+    2:                      '.minus, .plus', '.plus', '.minus', '.mback', '.mleft, .sep_left, .mleft_top, .mright, .sep_right, .mright_top',
+    2:                      '.msub, .mleft_bottom, .mright_bottom', '.hoverprompt .skin_tbl', '.hoverprompt .title',
+    2:                      '.hoverprompt .title a:link, .hoverprompt .title a:visited', '.tag .ww', '.tag .aa',
+    2:                      '.web a:link, .web a:visited, .web a:active', '.desc', '.title',
+    2:                      '.topic .title', '.mainbg', '.board .mainbg', '.ww, .xx, .yy, .zz, .board .aa',
+    2:                      '.aa, .bb, .cc, .zz', '.board .main6', '.board .foot', '.forum .foot',
+    2:                      '.bar', '.bar_left, .bar_right', '.border .skin_tbl_border', 
+    2:                      '.title2', '.border .title2', '.sunbar', '.skin_tbl_width .sunbar',
+    2:                      '.msg .sunbar', '.stats .ww', '.stats .aa', '.stats .highlight',
+    2:                      '.highlight', '.darkline', '.highlight a:link, .highlight a:visited, .highlight a:active',
+    2:                      '.highlight a:hover', '.left', '.right', '.left_top, .left_bottom',
+    2:                      '.right_top, .right_bottom', '.sep', '#end .title a:link, #end .title a:visited, #end .title a:active',
+    2:                      '#end .title a:hover', '.nick', '.nick a:link, .nick a:visited, .nick a:active',
+    2:                      '.nick a:hover', '.details', '#quote', '#code', '.spoiler #code', 'hr',
+    2:                      '.fancyborder', '.edit', '.bottomborder', '.signature', '.msg_main', '.msg .darkbar',
+    2:                      '.darkbar, .row2', '.row1', '.row3', '.title3', '#end .title3', 
+    2:                      '.msg .nick a:link, .msg .nick a:visited, .msg .nick a:active', '.msg .details p',
+    2:                      '.color', '.color a:link, .color a:visited, .color a:active', '.color a:hover',
+    2:                      '.alert', '.info', '.pagetitle, .pagetitle a:hover', '.profile .row1',
+    2:                      '.profile .title2', '.title2 a:link, .title2 a:visited', '.title2 a:hover',
+    2:                      '.profile .bottomborder', '.profile .skin_tbl_border', '.textinput',
+    2:                      '.menu .textinput', '.forminput', '.input', '.codebuttons',
+                            ]
+    2:         if self.skin:
+    2:             css = ''
+  204:             for selector in orderlist:
+  202:                 css += selector + ' { '
+  202:                 try:
+  768:                     for property in self.css[selector]:
+  566:                         css +=  property + ' '
+ 1428:                         for value in self.css[selector][property]:
+  862:                             if value == None:
+                                       continue
+  862:                             elif value[0:4] == 'http':
+   20:                                 value = 'url("'+value+'")'
+  862:                             css += value + ' '
+  566:                         css += '; '
+                       except:
+                           pass
+  202:                 css += '}\n'
+    2:             return css
+               else:
+                   print 'Apri una skin'
+                   
+                   
+    2: class SkinMap(QtGui.QDialog):
+    1:       def __init__(self, parent):
+    1:           QtGui.QDialog.__init__(self, parent)
+    1:           self.tab = QtGui.QTabWidget(self)
+    1:           self.setWindowTitle(self.tr('Seleziona elemento della skin'))
+    1:           self.setWindowIcon(QtGui.QIcon('images/system_search.png'))
+    1:           self.setFixedSize(config['mapBackground']['home']['w'],
+    1:                       config['mapBackground']['home']['h'])    
+    1:           layout = QtGui.QHBoxLayout() 
+    1:           layout.addWidget(self.tab)
+    1:           self.createWidget()
+    1:           self.setLayout(layout)
+    1:           self.hide()
+                 
+    1:       def createWidget(self):
+    1:           self.homeWidget = QtGui.QWidget(self)
+    1:           self.homeWidget.setStyleSheet('''QWidget {background-image: url(%s);
+                                                background-repeat: none;}
+                                       QPushButton  {background: 'transparent';
+    1:                                               border: 1px solid black;}''' 
+    1:                                          % config['mapBackground']['home']['file'])
+    1:           self.tab.addTab(self.homeWidget, self.tr('Home Page'))
+                 
+    1:           self.sectionWidget = QtGui.QWidget(self)
+    1:           self.sectionWidget.setStyleSheet('''QWidget {background-image: url(%s);
+                                                background-repeat: none;}
+    1:                                 QPushButton  {background: 'green';}''' 
+    1:                                 % config['mapBackground']['section']['file'])
+    1:           self.tab.addTab(self.sectionWidget, self.tr('Sezioni'))
+                 
+                 
+    1:           self.buttonList = {
+                               '.mtitle' : 
+    1:                         {'selector' : '.mtitle', 'size' : [70, 20], 'position' : [395, 150], 'parent' : self.homeWidget},
+                                                      
+                               'body' :
+    1:                         {'selector' : 'body', 'size' : [50, 20], 'position' : [5, 110], 'parent' : self.homeWidget},
+                               
+                               '.menu' :
+    1:                         {'selector' : '.menu', 'size' : [48, 20], 'position' : [55, 67], 'parent' : self.homeWidget},
+                               
+                               '.menu a:link, .menu a:visited, .menu a:active' :
+    1:                         {'selector' : '.menu a:link, .menu a:visited, .menu a:active', 'size' : [174, 20], 'position' : [108, 67], 'parent' : self.homeWidget},
+                               
+                               '.menu .textinput' :
+    1:                         {'selector' : '.menu .textinput', 'size' : [80, 20], 'position' : [310, 67], 'parent' : self.homeWidget},
+                               
+                               '.forminput' :
+    1:                         {'selector' : '.forminput', 'size' : [190, 20], 'position' : [414, 67], 'parent' : self.homeWidget},
+                               
+                               '.menu_right a:link, .menu_right a:visited' :
+    1:                         {'selector' : '.menu_right a:link, .menu_right a:visited', 'size' : [175, 20], 'position' : [635, 67], 'parent' : self.homeWidget},
+                               
+                               '.nav a:link' :
+    1:                         {'selector' : '.nav a:link', 'size' : [52, 20], 'position' : [110, 102], 'parent' : self.homeWidget},
+                               
+                               '.nav' :
+    1:                         {'selector' : '.nav', 'size' : [40, 20], 'position' : [168, 102], 'parent' : self.homeWidget},
+                               
+                               
+                               
+                               }         
+                 
+   10:           for name, element in self.buttonList.items():
+    9:               button = PushButton('', element['selector'], element['parent'])
+    9:               button.setFlat(True)
+    9:               button.setFixedSize(element['size'][0], element['size'][1])
+    9:               button.move(element['position'][0], element['position'][1])
+    9:               self.buttonList[name]['widget'] = button
+       
+    2: class SkinEditor(QtGui.QDockWidget):
+    1:     def __init__(self, parent, skinParser):
+    1:         QtGui.QDockWidget.__init__(self, parent)
+               
+    1:         self.setWindowTitle(self.tr('Editor'))
+    1:         self.parent = parent
+    1:         self.skin = skinParser
+    1:         self.skin.loadFromFile()
+               
+    1:         self.skinMap = SkinMap(self)
+    1:         self.createWidget()
+    1:         self.setWidget(self.cssWidget)
+       
+    1:     def createElement(self):
+    1:         self.tab = QtGui.QTabWidget(self)
+    1:         self.toolBox = QtGui.QToolBox(self)
+    1:         self.elementLabel = QtGui.QLabel(self.tr('Elemento:'))
+    1:         self.elementCombo = QtGui.QComboBox(self)
+    1:         self.elementCombo.setMinimumWidth(150)
+    1:         self.elementButton = QtGui.QPushButton(QtGui.QIcon('images/system_search.png'), self.tr('Seleziona visualmente'), self)
+               
+    1:         self.cssText = QtGui.QTextEdit(self)
+               
+               '''Background widget'''
+    1:         self.backgroundImageText = QtGui.QLineEdit(self)
+    1:         self.backgroundImageButton = QtGui.QPushButton(QtGui.QIcon('images/images_display.png'), self.tr('Visualizza immagine'), self)
+    1:         self.backgroundColorText = QtGui.QLineEdit(self)
+    1:         self.backgroundColorButton = QtGui.QPushButton(QtGui.QIcon('images/color_fill.png'), self.tr('seleziona colore'), self)
+    1:         self.backgroundColorWidget = QtGui.QFrame(self)
+    1:         self.backgroundColorWidget.setFixedSize(80, 20)
+    1:         self.backgroundColorWidget.setFrameStyle(QtGui.QFrame.WinPanel)
+    1:         self.backgroundColorWidget.setFrameShadow(QtGui.QFrame.Plain)
+    1:         self.backgroundColorWidget.setLineWidth(2)
+    1:         self.backgroundRepeatCombo = QtGui.QComboBox(self)
+    1:         self.backgroundFixedCheck = QtGui.QCheckBox(self.tr('Rendi lo sfondo fisso'), self)
+               
+               '''Font widget'''
+    1:         self.fontSelectCombo = QtGui.QFontComboBox(self)
+    1:         self.fontSizeSpin = QtGui.QSpinBox(self)
+    1:         self.fontSizeSpin.setSuffix('px')
+    1:         self.fontColorText = QtGui.QLineEdit(self)
+    1:         self.fontColorButton = QtGui.QPushButton(QtGui.QIcon('images/color_fill.png'), self.tr('seleziona colore'), self)
+    1:         self.fontColorWidget = QtGui.QFrame(self)
+    1:         self.fontColorWidget.setFixedSize(80, 20)
+    1:         self.fontColorWidget.setFrameStyle(QtGui.QFrame.WinPanel)
+    1:         self.fontColorWidget.setFrameShadow(QtGui.QFrame.Plain)
+    1:         self.fontColorWidget.setLineWidth(2)
+           
+    1:     def currentSelector(self):
+               return str( self.elementCombo.currentText() )
+           
+    1:     def updateColorWidget(self, widget, color):
+               if color:
+                   widget.setStyleSheet('QWidget { background-color: %s }' % color )
+               else:
+                   widget.setStyleSheet('')
+           
+    1:     def checkColor(self, color, textWidget):
+               qcolor = QtGui.QColor(color)
+               if qcolor.isValid() or color == '':
+                   self.backgroundColorText.setStyleSheet('')
+                   return True
+               else:
+                   self.backgroundColorText.setStyleSheet('background: "#c80e12"')
+                   return False
+                   
+    1:     def checkImageURL(self, image):
+               image = str(image)
+               if image[:4] == 'http' or image == '':
+                   self.backgroundImageText.setStyleSheet('')    
+                   return True        
+               else:
+                   self.backgroundImageText.setStyleSheet('background: "#c80e12"')
+                   return False
+           
+    1:     def selectorChanged(self, selector):
+               self.selector = self.skin.getSelector( str(selector) )
+               
+               try:
+                   backgroundColor = self.selector.background()['color']
+                   self.backgroundColorText.setText(backgroundColor)
+                   self.checkColor(color = backgroundColor, textWidget = self.backgroundColorText)  
+               except KeyError:
+                   backgroundColor = ''
+                   self.backgroundColorText.clear()
+                   self.backgroundColorText.setStyleSheet('')
+               finally:
+                   self.updateColorWidget(widget = self.backgroundColorWidget, color = backgroundColor)
+               
+               try:
+                   backgroundImage = self.selector.background()['image']
+                   self.backgroundImageText.setText(backgroundImage)
+                   self.checkImageURL(backgroundImage)
+               except KeyError:
+                   self.backgroundImageText.clear()
+             
+               try:
+                   backgroundRepeat = self.selector.background()['repeat']
+               except KeyError:
+                   backgroundRepeat = 'repeat'
+               finally:
+                   action = {'repeat' : 0,
+                             'repeat-x': 1,
+                             'repeat-y': 2,
+                             'no-repeat': 3}.get(backgroundRepeat)
+                   self.backgroundRepeatCombo.setCurrentIndex(action)
+       
+               try:
+                   fontFamily = self.selector.font()['family']
+                   self.fontSelectCombo.setEditText(fontFamily)
+               except KeyError:
+                   self.fontSelectCombo.clearEditText()
+               
+               try:
+                   fontSize = self.selector.font()['size'][:-2]
+                   fontSize = float(fontSize)
+                   self.fontSizeSpin.setValue(fontSize)
+               except KeyError:
+                   self.fontSizeSpin.clear()
+               
+               try:
+                   fontColor = self.selector.font()['color']
+                   self.fontColorText.setText(fontColor)
+               except KeyError:
+                   fontColor = ''
+                   self.fontColorText.clear()
+               finally:
+                   self.updateColorWidget(widget = self.fontColorWidget, color = fontColor)
+               
+               self.parent.updateWeb()
+                   
+    1:     def showBackgroundImage(self):
+               try:
+                   webbrowser.open_new_tab( self.backgroundImageText.text() )
+               except:
+                   QtGui.QErrorMessage(self).showMessage(self.tr('Impossibile aprire lo sfondo desiderato'))
+               
+    1:     def setCurrentEl(self, element):
+                index = self.elementCombo.findText(element)
+                self.elementCombo.setCurrentIndex(index)
+                self.skinMap.hide()
+            
+    1:     def showElement(self):
+               self.skinMap.show()
+            
+    1:     def setBackgroundImage(self, image):
+               image = str(image)
+               if self.checkImageURL(image):
+                   self.selector.setBackground(property = 'image', value = image)
+               print self.skin.css[self.currentSelector()]
+                   
+    1:     def setBackgroundColor(self, color):
+               if self.checkColor(color = color, textWidget = self.backgroundColorText):
+                   self.selector.setBackground(property = 'color', value = color)
+               print self.skin.css[self.currentSelector()]
+       
+    1:     def setBackgroundRepeat(self, value):
+               repeat = { 0 : 'repeat',
+                          1 : 'repeat-x',
+                          2 : 'repeat-y',
+                          3 : 'no-repeat'}.get(value)
+               self.selector.setBackground(property = 'repeat', value = repeat)
+               print self.skin.css[self.currentSelector()]
+               
+    1:     def setBackgroundAttachment(self, state):
+               action = 'fixed' if state else 'scroll'
+               self.selector.setBackground(property = 'attachment', value = action)
+               print self.skin.css[self.currentSelector()]
+               
+    1:     def setFontFamily(self, font):
+               font = str(font)
+               self.selector.setFont(property = 'family', value = font)
+               print self.skin.css[self.currentSelector()]
+               
+    1:     def setFontSize(self, size):
+               size = str(size) + 'px'
+               self.selector.setFont(property = 'size', value = size)
+               print self.skin.css[self.currentSelector()]
+               
+    1:     def setFontColor(self, color):
+               if self.checkColor(color = color, textWidget = self.fontColorText):
+                   self.selector.setFont(property = 'color', value = color)
+               print self.skin.css[self.currentSelector()]
+               
+    1:     def clickedBackgroundColor(self):
+               try:
+                   defaultColor = self.selector.background()['color']
+               except KeyError:
+                   defaultColor = '#000000'
+               default = QtGui.QColor(defaultColor)
+               color = QtGui.QColorDialog.getColor(default, self)
+               if color.isValid():
+                   self.setBackgroundColor( color.name() )
+                   self.backgroundColorText.setText( color.name() )
+       
+    1:     def clickedFontColor(self):
+               try:
+                   defaultColor = self.selector.font()['color']
+               except KeyError:
+                   defaultColor = '#000000'
+               default = QtGui.QColor(defaultColor)
+               color = QtGui.QColorDialog.getColor(default, self)
+               if color.isValid():
+                   self.setFontColor( color.name() )
+                   self.fontColorText.setText( color.name() )
+       
+    1:     def cssChanged(self):
+               css = str( self.cssText.toPlainText() )
+               self.skin.loadFromText(css)
+               a = self.currentSelector()
+               self.selectorChanged(a)
+               
+    1:     def reloadCssText(self):
+               self.cssText.setText( self.skin.getCSS() )
+       
+    1:     def connectEvent(self):
+    1:         self.elementCombo.addItems( ['Seleziona elemento'] + self.skin.css.keys() )
+    1:         self.cssText.setText( self.skin.getCSS() )
+    1:         self.backgroundRepeatCombo.addItems(['ripeti', 'orizzontalmente', 'verticalmente','non ripetere'])
+    1:         self.connect(self.elementCombo, QtCore.SIGNAL('currentIndexChanged(QString)'), self.selectorChanged)
+    1:         self.connect(self.backgroundImageButton, QtCore.SIGNAL('clicked()'), self.showBackgroundImage)
+    1:         self.connect(self.elementButton, QtCore.SIGNAL('clicked()'), self.showElement)
+    1:         self.connect(self.backgroundImageText, QtCore.SIGNAL('textEdited(QString)'), self.setBackgroundImage)
+    1:         self.connect(self.backgroundColorText, QtCore.SIGNAL('textEdited(QString)'), self.setBackgroundColor)
+    1:         self.connect(self.backgroundColorButton, QtCore.SIGNAL('clicked()'), self.clickedBackgroundColor)
+    1:         self.connect(self.backgroundRepeatCombo, QtCore.SIGNAL('currentIndexChanged(int)'), self.setBackgroundRepeat)
+    1:         self.connect(self.backgroundFixedCheck, QtCore.SIGNAL('stateChanged(int)'), self.setBackgroundAttachment)
+    1:         self.connect(self.fontSelectCombo, QtCore.SIGNAL('editTextChanged(QString)'), self.setFontFamily)
+    1:         self.connect(self.fontSizeSpin, QtCore.SIGNAL('valueChanged(int)'), self.setFontSize)
+    1:         self.connect(self.fontColorButton, QtCore.SIGNAL('clicked()'), self.clickedFontColor)
+    1:         self.connect(self.skin, QtCore.SIGNAL('selectorChanged(PyQt_PyObject)'), self.selectorChanged)
+    1:         self.connect(self.cssText, QtCore.SIGNAL('textChanged()'), self.cssChanged)
+    1:         self.connect(self.skin, QtCore.SIGNAL('cssChanged()'), self.reloadCssText)
+   10:         for button, items in self.skinMap.buttonList.items():
+    9:             self.connect(items['widget'], QtCore.SIGNAL('clickedText(PyQt_PyObject)'), self.setCurrentEl)
+                   
+    1:     def createWidget(self):
+    1:         self.cssWidget = QtGui.QWidget(self)
+    1:         self.createElement()
+    1:         self.connectEvent()
+               
+               '''Background Layout'''
+    1:         backgroundContainer = QtGui.QWidget(self)
+    1:         backgroundContainerLayout = QtGui.QFormLayout()
+               
+    1:         backgroundColorLayout = QtGui.QHBoxLayout()
+    1:         backgroundColorLayout.addWidget(self.backgroundColorWidget)
+    1:         backgroundColorLayout.addWidget(self.backgroundColorText)
+    1:         backgroundColorLayout.addWidget(self.backgroundColorButton)
+               
+    1:         backgroundImageLayout = QtGui.QHBoxLayout()
+    1:         backgroundImageLayout.addWidget(self.backgroundImageText)
+    1:         backgroundImageLayout.addWidget(self.backgroundImageButton)
+               
+    1:         backgroundContainerLayout.addRow(self.tr('Sfondo:'), backgroundColorLayout)
+    1:         backgroundContainerLayout.addRow(self.tr('Immagine:'), backgroundImageLayout)
+    1:         backgroundContainerLayout.addRow(self.tr('Ripeti:'), self.backgroundRepeatCombo)
+    1:         backgroundContainerLayout.addRow(None, self.backgroundFixedCheck)
+    1:         backgroundContainer.setLayout(backgroundContainerLayout)       
+    1:         self.toolBox.addItem(backgroundContainer, QtGui.QIcon('images/background.png'),self.tr('Sfondo'))
+               
+               '''Font Layout'''
+    1:         fontContainer = QtGui.QWidget(self)
+    1:         fontContainerLayout = QtGui.QFormLayout(self)
+               
+    1:         fontColorLayout = QtGui.QHBoxLayout()
+    1:         fontColorLayout.addWidget(self.fontColorWidget)
+    1:         fontColorLayout.addWidget(self.fontColorText)
+    1:         fontColorLayout.addWidget(self.fontColorButton)
+               
+    1:         fontContainerLayout.addRow(self.tr('Carattere:'), self.fontSelectCombo)
+    1:         fontContainerLayout.addRow(self.tr('Dimensione:'), self.fontSizeSpin)
+    1:         fontContainerLayout.addRow(self.tr('Colore:'), fontColorLayout)
+    1:         fontContainer.setLayout(fontContainerLayout)
+    1:         self.toolBox.addItem(fontContainer, QtGui.QIcon('images/text.png'),self.tr('Carattere'))
+               
+    1:         visualContainer = QtGui.QWidget(self)
+    1:         visualContainerVbox = QtGui.QVBoxLayout()
+    1:         visualContainerHbox = QtGui.QHBoxLayout()
+       
+    1:         visualContainerHbox.addWidget(self.elementLabel)
+    1:         visualContainerHbox.addWidget(self.elementCombo)   
+    1:         visualContainerHbox.addWidget(self.elementButton) 
+               
+    1:         visualContainerVbox.addLayout(visualContainerHbox)
+    1:         visualContainerVbox.addWidget(self.toolBox)
+    1:         visualContainer.setLayout(visualContainerVbox)
+               
+    1:         cssContainer = QtGui.QWidget(self)
+    1:         cssContainerLayout = QtGui.QVBoxLayout()
+    1:         cssContainerLayout.addWidget(self.cssText)
+    1:         cssContainer.setLayout(cssContainerLayout)
+               
+    1:         self.tab.addTab(visualContainer, self.tr('Editor Visuale'))
+    1:         self.tab.addTab(cssContainer, self.tr('Visualizza CSS'))
+    1:         layout = QtGui.QVBoxLayout()
+    1:         layout.addWidget(self.tab)     
+    1:         self.cssWidget.setLayout(layout)
+       
+               
+    2: class FFSkin(QtGui.QMainWindow):
+    1:     def __init__(self):
+    1:         QtGui.QMainWindow.__init__(self)
+    1:         self.setWindowTitle(self.tr('ForumFree Skin'))
+    1:         self.setWindowIcon(QtGui.QIcon('images/ffs.png'))
+    1:         self.showMaximized()
+               
+    1:         self.createMenu()
+    1:         self.skinParser = SkinParser()
+    1:         self.skinEditorDock = SkinEditor(self, self.skinParser)
+    1:         self.createWeb()
+    1:         self.createLayout()
+               
+    1:     def createMenu(self):
+    1:         self.menuBar = QtGui.QMenuBar()
+    1:         self.setMenuBar(self.menuBar)
+    1:         self.fileMenu = QtGui.QMenu(self.tr('&File'), self)
+    1:         self.exitAction = self.fileMenu.addAction(self.tr("E&xit"))
+    1:         self.menuBar.addMenu(self.fileMenu)
+               
+    1:         self.fileToolBar = self.addToolBar(self.tr("File"))
+    1:         self.newAct = QtGui.QAction(QtGui.QIcon("images/new.png"), self.tr("&New"), self)
+    1:         self.newAct.setShortcut(self.tr("Ctrl+N"))
+    1:         self.newAct.setStatusTip(self.tr("Create a new file"))
+    1:         self.fileToolBar.addAction(self.newAct)
+               
+    1:     def updateWeb(self):
+    1:         self.baseWebFile = open('skin_base/skin.html')
+    1:         basePage = self.baseWebFile.read()
+    1:         basePage = basePage.replace('CSSSKIN', self.skinEditorDock.skin.getCSS())
+    1:         self.web.setHtml(basePage)
+               
+    1:     def createWeb(self):
+    1:         self.web = QtWebKit.QWebView()
+    1:         self.updateWeb()
+                     
+    1:     def createLayout(self):
+    1:         self.setCentralWidget(self.web)
+    1:         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.skinEditorDock)
+       
+               
+    1: if __name__ == "__main__":
+    1:     app = QtGui.QApplication(sys.argv)
+    1:     window = FFSkin()
+    1:     window.show()
+    1:     sys.exit(app.exec_())

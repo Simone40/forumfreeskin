@@ -1,0 +1,13 @@
+    1: config = {
+    1:           'version' : 'alpha',
+    1:           'size' : { 'w' : 900,
+    1:                      'h' : 500},
+                            
+    1:           'mapBackground' : { 'home' :  { 'file' :'images/home.jpg',
+    1:                                           'w' : 870,
+    1:                                           'h' : 532 },
+    1:                               'section' : {'file' : 'images/section.jpg',
+    1:                                            'w' : 870,
+    1:                                            'h' : 532 }
+                                  }
+                 }

@@ -1,0 +1,278 @@
+/* INIZIO KEEPERART SKIN 2.0 */
+
+
+/* DICHIARAZIONI BASE */
+
+body {background: repeat-x top #EAF4FB; font-family: verdana, tahoma, arial; font-size: 11px; color: #3C3C3C}
+
+table, div {font-size: 10px; color: #3C3C3C}
+
+a:link, a:visited, a:active {color: #6F6F6F; text-decoration: none}
+
+a:hover {color: #AAA; text-decoration: underline}
+
+
+
+/* SCRITTE ESTERNE */
+
+.nav {font-family: arial, helvetica; font-size: 13px; letter-spacing: 1px; font-weight: bold; color: #3F3F3F}
+
+
+
+/* DIMENSIONI FORUM */
+
+.skin_tbl_width, .skin_tbl, .header_width, .stats .border {width: 80%}
+
+.skin_tbl_border {border: 4px solid #CCC; background: #FFF}
+
+
+
+/* COLORI LISTA UTENTI ATTIVI */
+
+.utente {color: #AAA}
+
+.amministratore {color: #71B6D6; font-weight: bold}
+
+.moderatore {color: #7E99BE; font-weight: bold}
+
+.daconvalidare {color: #000; font-style: italic}
+
+.gruppo1 {color: #FF0000; font-weight: bold}
+
+.gruppo2 {color: #80A9FF; font-weight: bold}
+
+.gruppo3 {color: #95DDFF; font-weight: bold}
+
+.gruppo4 {color: #8AC8DC; font-weight: bold}
+
+.gruppo5 {color: #FFF000; font-weight: bold}
+
+.gruppo6 {color: #FFB56A; font-weight: bold}
+
+
+/* BARRA UTENTE */
+
+.header_width {background: #8AC8DC; border: 1px solid #CCC}
+
+.header {border: 1px solid #FFF}
+
+.menu {background: url(http://img.forumfree.net/style_images/37/tile_sub.gif) repeat-x #DFE2E4; border: 1px solid #FFF; border-top: 0; color: #396F90; letter-spacing: 1px}
+
+.menu a:link, .menu a:visited, .menu a:active {color: #3A4F6C}
+
+.menu a:hover {color: #4A668A}
+
+.menu_right a:link, .menu_right a:visited {text-decoration: none}
+
+
+.nav {font-size: 12px; font-weight: bold; color: #3F3F3F}
+.nav a:link {color: #4A668A}
+/* BARRA ATTORNO AL FORUM */
+
+.mtitle {color: #396F90; font-family: arial, helvetica; font-size: 13px; letter-spacing: 1px; font-weight: bold; font-style:italic; float:left}
+
+.mback_left, .mback_right {width: 22px}
+
+.mleft_bottom, .mright_bottom {background: url(http://img.forumfree.net/style_images/37/bottom.gif) no-repeat}
+
+.minus, .plus {width: 10px; height: 10px}
+
+.plus {background: url(http://img.forumfree.net/style_images/37/plus.gif)}
+
+.minus {background: url(http://img.forumfree.net/style_images/37/minus.gif)}
+
+.mback {height: 35px; background: url(http://www.xhost-image.net/user_uploads/2007/07/8mback.gif) repeat-x #E8E8E8; border-top: 4px solid #CCCCCC; border-bottom: 1px solid #CCC}
+
+.mleft, .sep_left, .mleft_top, .mright, .sep_right, .mright_top {width: 4px; background: #CCC}
+
+.msub, .mleft_bottom, .mright_bottom {background: #CCC; height: 4px; font-size: 0}
+
+
+
+/* AD */
+
+.hoverprompt .skin_tbl {border: 4px solid #CCCCCC}
+
+.hoverprompt .title {background: #8AC8DC; border: 1px solid #53A0CF}
+
+.hoverprompt .title a:link, .hoverprompt .title a:visited {color: #FFF; font-weight: bold}
+
+
+/* TAG BOARD */
+
+.tag .ww {border: 0; background: #F5F5F5}
+
+.tag .aa {border-top: 1px solid #EEEEEE; border-bottom: 1px solid #EEEEEE; border-left: 0; border-right: 0; background: #FFF}
+
+
+
+/* SEZIONI FORUM */
+
+.web a:link, .web a:visited, .web a:active {font-family: arial, helvetica; font-size: 13px; letter-spacing: 1px; color: #396F90}
+
+.desc {color: #8F8F8F; font-style: italic}
+
+
+.title {background: none; border: 1px solid #EEE}
+
+.topic .title {background: #F5F5F5; border: 0}
+
+.mainbg {background: #FFF}
+
+.board .mainbg {background: #FFF; border-bottom: 10px solid #8AC8DC}
+
+.ww, .xx, .yy, .zz, .board .aa {background: #FFF; color: #6F6F6F; border: 1px solid #EEE}
+
+.aa, .bb, .cc, .zz {background: #FFF; color: #6F6F6F; border: 1px solid #EEE}
+
+.board .main6 {border-bottom: 1px solid #53A0CF}
+
+.board .foot {display: none}
+
+.forum .foot {background: #8AC8DC; border-top: 1px solid #53A0CF}
+
+
+
+/* STATISTICHE */
+
+.bar {background: url(http://skin.forumfree.net/keeper_art/stats.gif) center repeat-x; border: 1px solid #53A0CF}
+
+.bar_left, .bar_right { display: none }
+
+.border .skin_tbl_border {background: url(http://skin.forumfree.net/keeper_art/stats.gif) repeat-x #FFF; border: 4px solid #CCC}
+
+.title2 {background: url(http://skin.forumfree.net/keeper_art/stats.gif) repeat-x; height: 35px; border-bottom: 1px solid #53A0CF; color: #FFF; font-family: arial, helvetica; font-size: 13px; letter-spacing: 1px; font-weight: bold}
+
+.border .title2 {padding-left: 21px; height: 35px; color: #FFF; font-family: arial, helvetica; font-size: 13px; letter-spacing: 1px; font-weight: bold; background:none; border: 0}
+
+.sunbar {color: #3A566C; font-weight: bold; margin-top: 1px; padding: 7px; background: #EFF9FF}
+
+.skin_tbl_width .sunbar {display: none}
+
+.msg .sunbar {background: #FFF; border: 1px solid #EEEEEE}
+
+.stats .ww {width: 0%; padding: 6px}
+
+.stats .aa {width: 100%}
+
+.stats .highlight {color: #3C3C3C}
+
+.highlight {color: #9DBD6C}
+
+.darkline {background: none; border-bottom: 1px solid #FFF}
+
+
+
+/* LINK MOD */
+
+.highlight a:link, .highlight a:visited, .highlight a:active {display: block; padding: 5px; font-size: 8pt; text-align: center; background-color: #FFF; border: 1px dashed #DDD; color: #3C3C3C; text-decoration: none}
+
+.highlight a:hover {background-color: #F0F5FA; border: 1px dashed #DDD}
+
+
+/* DISCUSSIONE */
+
+.left {background: #F5F5F5}
+
+.right {background: #F5F5F5}
+
+.left_top, .left_bottom {border: 1px solid #EEE; background: #FFF; border-right: 0}
+
+.right_top, .right_bottom {border: 1px solid #EEE; background: #FFF; border-left: 0}
+
+.sep {height: 4px; background: #CCC}
+
+#end .title a:link, #end .title a:visited, #end .title a:active {color: #396F90; text-decoration: none}
+
+#end .title a:hover {color: #4D6A8A; text-decoration: underline}
+
+.nick {font-family: arial, helvetica; font-size: 16px; font-weight:bold; font-style: italic; color: #900}
+
+.nick a:link, .nick a:visited, .nick a:active {text-decoration: none; color: #396F90}
+
+.nick a:hover {color: #76B9D7}
+
+.details {font-style: italic; color: #396F90}
+
+#quote {background: #FAFCFE; border: 1px dotted #8AC8DC; border-left: 3px solid #D1E8EF; border-top: 7px solid #D1E8EF; margin: 0 auto 8px auto; padding: 4px; font-size: 8pt; color: #396F90}
+
+#code {background: #FAFCFE; border: 1px dotted #F3D6D7; border-left: 3px solid #F3D6D7; border-top: 7px solid #F3D6D7; margin: 0 auto 8px auto; padding: 4px; font-size: 8pt; color: #3F3F3F}
+
+.spoiler #code {background: #FAFCFE; border: 1px dotted #CCCCCC; border-left: 3px solid #CCCCCC; border-top: 7px solid #CCCCCC; margin: 0 auto 8px auto; padding: 4px; font-size: 8pt; color: #3F3F3F}
+
+hr {background: none; border: 0; border-bottom: 2px solid #CCC}
+
+.fancyborder {background: #F7F7F7; border: #DDD 1px solid}
+
+.edit {font-size: 9px; color: #9DBD6C}
+
+.bottomborder {border-bottom: #666 dashed 1px}
+
+.signature {color: #304459; font-size: 10px; line-height: 150%}
+
+
+
+/* MESSENGER */
+
+.msg_main {background: #F5F5F5; line-height: 150%}
+
+.msg .darkbar {height: 26px; background: #FFF; border: 1px solid #EEEEEE; color: #3A566C; font-weight: bold; letter-spacing: 1px; margin: 0; padding: 5px}
+
+.darkbar, .row2 {background: #FFF; border: 1px solid #EEE; font-weight: bold; color: #3C3C3C; letter-spacing: 1px; margin: 0; padding: 7px}
+
+.row1 {background: #F5F5F5; padding: 6px}
+
+.row3 {border: 1px solid #CCC; background: #FFF}
+
+.title3 {background: #E3DDC7; border-bottom: 1px solid #CCCCCC; font-weight: bold; letter-spacing: 1px; margin: 0; padding: 5px}
+
+#end .title3 {border: 0; border-top: 1px solid #CCCCCC}
+
+.msg .nick a:link, .msg .nick a:visited, .msg .nick a:active {text-decoration: none}
+
+.msg .details p {color: #9CA4AE; line-height: 150%}
+
+.color {font-family: arial, sans-serif; font-size: 12px; line-height: 160%; padding: 10px; letter-spacing: 1px}
+
+.color a:link, .color a:visited, .color a:active {text-decoration: none; color: #8AC8DC; font-style:italic}
+
+.color a:hover {color: #396F90}
+
+.alert {background: #F4E7EA; border: 1px solid #986265; color: #986265; padding-left: 1px; padding-right: 1px}
+
+.info {background: #F0F5FA; border: 1px solid #C2CFDF; color: #3C3C3C; padding-left: 1px; padding-right: 1px}
+
+.pagetitle, .pagetitle a:hover {font-weight: bold; font-size: 18px; color: #9CA4AE; line-height: 120%; letter-spacing: -1px}
+
+
+
+/* PROFILO UTENTI */
+
+.profile .row1 {background: #FFF; padding: 0}
+
+.profile .title2 {border-top: 1px solid #9CA4AE}
+
+.title2 a:link, .title2 a:visited {color: #FFF; text-decoration: none}
+
+.title2 a:hover {color: #FFF; text-decoration: underline}
+
+.profile .bottomborder {border-bottom: 1px dashed #DDD}
+
+.profile .skin_tbl_border {background: #CCC}
+
+
+
+/* INPUT */
+
+.textinput {border: 1px solid #CCC; background: #EBEBEB; font-size: 11px; color: #000; font-family: verdana, helvetica, sans-serif; vertical-align: middle}
+
+.menu .textinput {background-color: #F2F2F2}
+
+.forminput {border: 1px solid #CCC; background: url(http://img.forumfree.net/style_images/37/button.gif) repeat-x #FEFEFE; color: #346C8F; font-size: 10px; color: #000; font-family: verdana, helvetica, sans-serif; vertical-align: middle}
+
+.input {border: 1px solid #CCC; background-color: #D1E0BA; font-size: 10px; color: #000; font-family: verdana, helvetica, sans-serif; vertical-align: middle}
+
+.codebuttons {border: 1px solid #CCC; background: url(http://skin.forumfree.net/keeper_art/stats.gif) center repeat-x #8AC8DC; font-size: 10px; color: #346C8F; font-family: verdana, helvetica, sans-serif; vertical-align: middle}
+
+
+/* FINE KEEPERART SKIN 2.0 */
